@@ -1,0 +1,88 @@
+<?php
+	/*
+	 * HLstats - Real-time player and clan rankings and statistics for Half-Life
+	 * http://sourceforge.net/projects/hlstats/
+	 *
+	 * Copyright (C) 2001  Simon Garner
+	 *
+	 * This program is free software; you can redistribute it and/or
+	 * modify it under the terms of the GNU General Public License
+	 * as published by the Free Software Foundation; either version 2
+	 * of the License, or (at your option) any later version.
+	 *
+	 * This program is distributed in the hope that it will be useful,
+	 * but WITHOUT ANY WARRANTY; without even the implied warranty of
+	 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	 * GNU General Public License for more details.
+	 *
+	 * You should have received a copy of the GNU General Public License
+	 * along with this program; if not, write to the Free Software
+	 * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+	 */
+	 
+	if ($auth->userdata['acclevel'] < 80) die ('Access denied!');
+?>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<img src="<?php echo $g_options['imgdir']; ?>/downarrow.gif" width=9 height=6 border=0 align="middle" alt="downarrow.gif"><b>&nbsp;<a href="<?php echo $g_options['admin_scripturl']; ?>?mode=admin&task=tools_editdetails">Edit Player or Clan Details</a></b><br>
+
+<img src="<?php echo $g_options['imgdir']; ?>/spacer.gif" width=1 height=8 border=0><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="<?php echo $g_options['imgdir']; ?>/downarrow.gif" width=9 height=6 border=0 align="middle" alt="downarrow.gif"><b>&nbsp;<?php echo "Edit Clan #$id"; ?></b><p>
+
+<form method="POST" action="<?php echo $g_options['admin_scripturl'] . "?mode=admin&task=$selTask&id=$id"; ?>">
+<?php
+	$proppage = new PropertyPage(
+        '' . $xoopsDB->prefix('hlstats_Clans') . '', 'clanId', $id, [
+		new PropertyPage_Group(
+            'Profile', [
+                         new PropertyPage_Property('name', 'Clan Name', 'text'),
+                         new PropertyPage_Property('homepage', 'Homepage URL', 'text')
+        ]
+        )
+    ]
+    );
+	
+	
+	if ($_POST)
+	{
+		$proppage->update();
+		message('success', 'Profile updated successfully.');
+	}
+	
+	
+	
+	$result = $xoopsDB->query(
+        '
+		SELECT
+			*
+		FROM
+			' . $xoopsDB->prefix('hlstats_Clans') . "
+		WHERE
+			clanId='$id'
+	");
+	if ($xoopsDB->getRowsNum($result) < 1) die("No clan exists with ID #$id");
+	
+	$data = $xoopsDB->fetchArray($result);
+	
+	echo $g_options['font_title'];
+	echo $data['tag'];
+	echo $g_options['fontend_title'];
+	
+	echo '<font class="fontNormal">';
+	echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+         . '<a href="' . $g_options['scripturl'] . "?mode=claninfo&clan=$id" . '">'
+         . '(View Clan Details)</a>';
+	echo '</font>';
+?><p>
+
+<table width="60%" align="center" border=0 cellspacing=0 cellpadding=0>
+<tr>
+	<td><?php
+		echo '<font class="fontNormal">';
+		$proppage->draw($data);
+		echo '</font>';
+?>
+	<center><input type="submit" value="  Apply  " class="submit"></center></td>
+</tr>
+</table>
+</form>
+
